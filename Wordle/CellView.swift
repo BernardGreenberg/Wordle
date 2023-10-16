@@ -119,7 +119,7 @@ final class CellView: NSView  {
     }
     
     public func jiggleForDisappointment() {
-        JiggleForDisappointmet(self).run(delay: 0)
+        JiggleForDisappointment(self).run(delay: 0)
     }
 }
 
