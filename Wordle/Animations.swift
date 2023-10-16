@@ -10,13 +10,14 @@ import Foundation
 protocol AnimatorProtocol {
     func pointTransform(_ theta: Double) -> CGAffineTransform?
     func finish()
+    var wholePerformanceDuration : Double {get}
 }
 
 class animateForJoy : AnimatorProtocol {
     /* Times are in seconds. Note that there is no mixed-mode arithmetic in Swift :( */
     let interCellDelay = 0.07
     let nPoints = 50.0
-    let wholePerformanceDuration = 0.75
+    var wholePerformanceDuration : Double {get {0.75}}
     let endTheta = 2.0*Double.pi
 
     var View : CellView
@@ -87,10 +88,11 @@ class PirouetteForJoy : animateForJoy {
 }
 
 class JiggleForDisappointment : animateForJoy {
+    override var wholePerformanceDuration : Double {get {0.25}}
     override func pointTransform (_ theta: Double) -> CGAffineTransform {
         return CGAffineTransform(a: 1, b: 0,
                                  c: 0, d: 1,
-                                 tx: 10.0*sin(6.0*theta), ty: 0)
+                                 tx: 10.0*sin(4.0*theta), ty: 0)
     }
     override func finish() {
         View.setTransform(CGAffineTransform.identity) //don't know why nil not good enough
