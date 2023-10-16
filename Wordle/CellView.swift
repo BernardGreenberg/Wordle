@@ -117,6 +117,10 @@ final class CellView: NSView  {
     public func pirouetteForJoy(delay: Int) {
         PirouetteForJoy(self).run(delay: delay)
     }
+    
+    public func jiggleForDisappointment() {
+        JiggleForDisappointmet(self).run(delay: 0)
+    }
 }
 
 

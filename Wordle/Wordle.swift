@@ -214,6 +214,7 @@ class Wordle: NSObject {
             return
         case .BOGUS:
             BogonReporter.displayText("Unknown word: " + curRowWord())
+            jiggleRowForDisappointment(row: curRow)
         case .GOOD: do {
             if curRow < LAST_ROW {
                 selectCellRC(curRow + 1, 0)
@@ -320,6 +321,12 @@ class Wordle: NSObject {
     private func jumpRowForJoy(row: Int) {
         for (cell, i) in zip(Cells[row], 0...LAST_COLUMN) {
             cell.jumpForJoy(delay: i)
+        }
+    }
+    
+    private func jiggleRowForDisappointment(row: Int) {
+        for cell in Cells[row] {
+            cell.jiggleForDisappointment()
         }
     }
 }

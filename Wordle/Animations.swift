@@ -51,7 +51,7 @@ class animateForJoy : AnimatorProtocol {
             Theta += deltaTheta
             setTimer(deltaT)
         } else {
-            View.setTransform(nil)
+            View.setTransform(CGAffineTransform.identity) //don't know why nil not good enough
         }
     }
     
@@ -86,3 +86,10 @@ class PirouetteForJoy : animateForJoy {
     }
 }
 
+class JiggleForDisappointmet : animateForJoy {
+    override func pointTransform (_ theta: Double) -> CGAffineTransform {
+        return CGAffineTransform(a: 1, b: 0,
+                                 c: 0, d: 1,
+                                 tx: 10.0*sin(6.0*theta), ty: 0)
+    }
+}
