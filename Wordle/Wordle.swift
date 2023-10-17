@@ -182,7 +182,8 @@ class Wordle: NSObject {
     }
     
     public func handleEnter() {
-        if testUp {
+        /* This is a pretty complex overloaded gesture, Enter/Return ...  */
+        if testUp || Revelator.isVisible {
             newGame()
         }
         else if curRowCommitted {
@@ -197,7 +198,7 @@ class Wordle: NSObject {
     }
 
     public func handleRubout() {  //called by input receiver when Delete pressed
-        if curCol == 0 || curRowCommitted || testUp {return}
+        if curCol == 0 || curRowCommitted || Revelator.isVisible || testUp {return}
         BogonReporter.isHidden = true
         selectCell(curRow, curCol-1)
     }

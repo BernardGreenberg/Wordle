@@ -24,6 +24,7 @@ private func makeCustomTextControl(frame: NSRect) -> NSTextField {
 class PopupView: NSView {
     var Text : NSTextField? = nil
     var Color: NSColor = .white
+    var isVisible : Bool {get {!self.isHidden}}
   
     public func setText(text: String) {
         Text!.stringValue = text
