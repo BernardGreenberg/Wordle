@@ -36,6 +36,7 @@ class Wordle: NSObject {
     var Answer = "     "
     var selectedCell : CellView? = nil
     var curRowCommitted = false
+    var testUp = false
     
     /* Cancel with button click or Enter, as Apple wants, no more char routing */
     private func alert(message: String, messageBody: String) {
@@ -86,6 +87,12 @@ class Wordle: NSObject {
             Cells.append(Row)
         }
     }
+
+    private func createCellAtRowCol(row: Int, col:Int, view: NSView) -> CellView {
+        let x = col*CELL_SIZE
+        let y = Int(view.frame.height) - row*CELL_SIZE - CELL_SIZE // -CELL_SIZE is because we're positioning its bottom
+        return CellView(frame: NSRect(origin:CGPoint(x: x, y: y), size:CGSize(width: CELL_SIZE, height:CELL_SIZE)))
+    }
     
     private func readVocabularyFiles() ->Bool {
         /* Get vocabulary data from resource files */
@@ -102,12 +109,6 @@ class Wordle: NSObject {
         }
         Possibles.merge(Answers) //there are about 50 words in Answers not in Possibles, mainly modernisms
         return true
-    }
-
-    private func createCellAtRowCol(row: Int, col:Int, view: NSView) -> CellView {
-        let x = col*CELL_SIZE
-        let y = Int(view.frame.height) - row*CELL_SIZE - CELL_SIZE // -CELL_SIZE is because we're positioning its bottom
-        return CellView(frame: NSRect(origin:CGPoint(x: x, y: y), size:CGSize(width: CELL_SIZE, height:CELL_SIZE)))
     }
     
     /* string[3] as in Python, C, Java, etc. doesn't work in Swift. This bullshit is necessary. */
@@ -137,6 +138,7 @@ class Wordle: NSObject {
     public func testGraphics () {
         Revelator.hide()
         BogonReporter.hide()
+        closeSelectCell()
         mapAllCells{(row, col, cell) in
             cell.letter = self.letterAt(ALPHABET30, row*NCOLUMNS + col)
             switch (col) {
@@ -154,19 +156,18 @@ class Wordle: NSObject {
             }
             cell.isHidden = false
         }
-        selectCell(nil)
         jumpRowForJoy(row: 2)
-        curRow = 0
-        curCol = 0
+        jiggleRowForDisappointment(row: 5)
+        testUp = true
     }
     
     /* Handle input characters other than "rubout" and "Enter". See AppDelegate.swift */
     
     public func handleCharacter(input: String){          /* not Enter */
 
-        if selectedCell == nil {
+        if selectedCell == nil || testUp {
             return
-        } // Covers all cases (e.g., test, end of row)
+        }
         
         // Otherwise, install new letter and move input pointer.
             
@@ -174,14 +175,18 @@ class Wordle: NSObject {
             selectedCell!.letter = input
             curCol += 1
             if (curCol < NCOLUMNS) {
-                selectCellRC(curRow, curCol)
+                selectCell(curRow, curCol)
             } else { // end of row condition
-                selectCell(nil)
+                closeSelectCell()
             }
         }
     }
     
     public func handleEnter() {
+        if testUp {
+            newGame()
+            return
+        }
         if curRowCommitted {
             if curRowWord() == Answer {
                 newGame()
@@ -197,11 +202,11 @@ class Wordle: NSObject {
     }
 
     public func handleRubout() {  //called by input receiver when Delete pressed
-        if curCol == 0 || curRowCommitted {return}
+        if curCol == 0 || curRowCommitted || testUp {return}
         BogonReporter.isHidden = true
         
         //If not at beginning of line, back up and blank the cell.
-        selectCellRC(curRow, curCol-1)
+        selectCell(curRow, curCol-1)
         selectedCell!.letter = ""
     }
     
@@ -217,10 +222,10 @@ class Wordle: NSObject {
             jiggleRowForDisappointment(row: curRow)
         case .GOOD: do {
             if curRow < LAST_ROW {
-                selectCellRC(curRow + 1, 0)
+                selectCell(curRow + 1, 0)
             } else {
+                closeSelectCell()
                 curRowCommitted = true
-                selectCell(nil)
                 reveal()
             }
         }
@@ -228,8 +233,8 @@ class Wordle: NSObject {
     }
 
     private func declareVictory() {
+        closeSelectCell()
         hideEmptyCells()
-        selectCell(nil)
         jumpRowForJoy(row: curRow)
         curRowCommitted = true
     }
@@ -280,8 +285,8 @@ class Wordle: NSObject {
     }
     
     public func reveal() {
+        closeSelectCell()
         hideEmptyCells()
-        selectCell(nil)
         BogonReporter.hide()
         Revelator.displayText(Answer)
     }
@@ -296,25 +301,23 @@ class Wordle: NSObject {
             cell.background = .black
             cell.isHidden = false
         }
-        selectCellRC(0, 0)
+        selectCell(0, 0)
     }
     
-    private func selectCellRC(_ row: Int, _ col: Int) {
+    private func selectCell(_ row: Int, _ col: Int) {
         (curRow, curCol) = (row, col)
-        selectCell(Cells[row][col])
-        if col == 0 {
-            curRowCommitted = false
-        }
+        testUp = false
+        curRowCommitted = false
+        closeSelectCell()
+        let cell = Cells[row][col]
+        selectedCell = cell
+        cell.isSelected = true
     }
     
-    private func selectCell(_ cell: CellView?) {
+    private func closeSelectCell() {
         if selectedCell != nil {
             selectedCell!.isSelected = false
             selectedCell = nil
-        }
-        if (cell != nil) {
-            selectedCell = cell!
-            cell!.isSelected = true
         }
     }
     
