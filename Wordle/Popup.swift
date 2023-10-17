@@ -18,6 +18,12 @@ private func makeCustomTextControl(frame: NSRect, bgColor: NSColor) -> NSTextFie
     control.font = Font
     control.alignment = .center
     control.isEditable = false
+    
+    /* from web sources, SwiftUI suggestions, and luck.  */
+    control.wantsLayer = true
+    control.clipsToBounds = true
+    control.layer?.cornerRadius = 15.0
+
     return control
 }
 
