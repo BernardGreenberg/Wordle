@@ -10,8 +10,7 @@ import Cocoa
 private let Font = NSFontManager.shared.font(withFamily: "Arial", traits: .boldFontMask, weight: 0, size: 20.0)
 
 private func makeCustomTextControl(frame: NSRect) -> NSTextField {
-    let frammis = CGRect(origin:CGPoint(x: frame.origin.x, y: frame.origin.y - 10.0), size:frame.size)
-    let control = NSTextField(frame: frammis)
+    let control = NSTextField(frame: frame) // adjusting the frame to position string better doesn't seem to work.
     control.textColor = .black
     control.drawsBackground = true
     control.isSelectable = false
@@ -22,34 +21,27 @@ private func makeCustomTextControl(frame: NSRect) -> NSTextField {
 }
 
 class PopupView: NSView {
-    var Text : NSTextField? = nil
-    var Color: NSColor = .white
-    var isVisible : Bool {get {!self.isHidden}}
+    private var Text : NSTextField!
+    public var isVisible : Bool {get {!self.isHidden}}
   
-    public func setText(text: String) {
-        Text!.stringValue = text
-    }
- 
     required init?(coder decoder: NSCoder) {
-        Color = .white
         super.init(coder: decoder)
     }
 
     init(frame frameRect: NSRect, color: NSColor) {
-        Color = color
         super.init(frame: frameRect)
         Text = makeCustomTextControl(frame:frameRect)
-        Text?.backgroundColor = Color
-        addSubview(Text!)
+        Text.backgroundColor = color
+        addSubview(Text)
         isHidden = true
     }
     
-    func displayText(_ text: String) {
-        setText(text: text)
+    public func displayText(_ text: String) {
+        Text.stringValue = text
         isHidden = false
     }
     
-    func hide() {
+    public func hide() {
         isHidden = true
     }
 }
