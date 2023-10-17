@@ -9,24 +9,38 @@ import Cocoa
 
 private let SELECTED_FRAME_COLOR = CGColor(red: 1.00, green: 1.00, blue: 0.00, alpha: 1)
 private let NORMAL_FRAME_COLOR = CGColor(red: 0.50, green: 0.50, blue: 0.50, alpha: 1)
+private let CONTAINS_MATCH_COLOR = NSColor(red:177.0*xCF, green:159.0*xCF, blue:60.0*xCF, alpha: 1)
+private let POSITION_MATCH_COLOR = NSColor(red:0*xCF, green:128.0*xCF, blue:0.0*xCF, alpha: 1)
 
 private let BOX_INDENT = 3
 private let CONTROL_INDENT = 5.0
 private let FONT_SIZE = 40.0 // not worth recreating font from dimensions every time a cell is created.
 
+enum CellState {
+    case empty
+    case selected
+    case populated
+    case contains_match
+    case contains_and_place_match
+}
+
+private var stateColor : [CellState : NSColor] = [
+    .empty : .black,
+    .selected : .black,
+    .populated : .black,
+    .contains_match : CONTAINS_MATCH_COLOR,
+    .contains_and_place_match : POSITION_MATCH_COLOR
+]
+
 final class CellView: NSView  {
     var Text: NSTextField!
-    
-    var Color : NSColor = .black
+    var State : CellState = .empty
     var Letter : String = ""
-    var Selected : Bool = false
 
     static var Font = NSFontManager.shared.font(withFamily: "Arial", traits: .boldFontMask, weight: 0, size: FONT_SIZE)
 
     var letter: String { get {Letter} set(x) {self.setLetter(letter: x)}}
-    var isSelected: Bool {get {Selected} set (select) {self.setSelected(select:select)}}
-    var background : NSColor {get {Color}set (color) {self.setBackgroundColor(color: color)}}
-
+    var state : CellState {get {State} set (new_state) {self.setState(new_state:new_state)}}
 
     private func drawBox() {
         /* https://stackoverflow.com/questions/38079917/drawing-in-cocoa-swift */
@@ -42,7 +56,7 @@ final class CellView: NSView  {
         context.addLine(to: CGPoint(x: W-BI, y: BI))
         context.addLine(to: CGPoint(x: BI,   y: BI))
 
-        context.setStrokeColor(isSelected ? SELECTED_FRAME_COLOR : NORMAL_FRAME_COLOR)
+        context.setStrokeColor(State == .selected ? SELECTED_FRAME_COLOR : NORMAL_FRAME_COLOR)
         context.strokePath()
     }
 
@@ -54,8 +68,6 @@ final class CellView: NSView  {
     required init?(coder decoder: NSCoder) {
         super.init(coder: decoder)
     }
-
-  
 
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
@@ -77,20 +89,18 @@ final class CellView: NSView  {
         return control
     }
  
-    private func setLetter(letter: String?) {
-        Letter = letter!
+    private func setLetter(letter: String) {
+        Letter = letter
         Text.stringValue = Letter.uppercased()
     }
     
-    private func setBackgroundColor(color: NSColor) {
-        // Have to check "Draws Background" in XIB properties or this is a no-op.
-        (Color = color)
-        Text.backgroundColor = color
-    }
-    
-    private func setSelected(select: Bool) {
-        Selected = select
-        setNeedsDisplay(frame) /* Cocoa doesn't know to redisplay unless we tell it */
+    private func setState(new_state: CellState) {
+        State = new_state
+        Text.backgroundColor = stateColor[State]!
+        if State == .empty || State == .selected {
+            setLetter(letter:"")
+        }
+        setNeedsDisplay(frame)
     }
 
     /* API */

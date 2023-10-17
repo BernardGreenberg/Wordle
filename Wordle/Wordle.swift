@@ -15,8 +15,6 @@ let LAST_COLUMN = NCOLUMNS-1
 let ALPHABET = "abcdefghijklmnopqrstuvwxyz"
 let ALPHABET30 = ALPHABET + "θφγδ"   //θεου φοβος γενει δαιμονια
 let xCF = 1.0/256.0
-let CONTAINS_MATCH_COLOR = NSColor(red:177.0*xCF, green:159.0*xCF, blue:60.0*xCF, alpha: 1)
-let POSITION_MATCH_COLOR = NSColor(red:0*xCF, green:128.0*xCF, blue:0.0*xCF, alpha: 1)
 
 let CELL_SIZE = 64
 
@@ -127,7 +125,7 @@ class Wordle: NSObject {
     
     private func hideEmptyCells() {
         mapAllCells{(_, _, cell) in
-            if cell.letter == "" {
+            if cell.state == .empty {
                 cell.isHidden = true
             }
         }
@@ -138,16 +136,16 @@ class Wordle: NSObject {
     public func testGraphics () {
         Revelator.hide()
         BogonReporter.hide()
-        closeSelectCell()
+        closeSelectedCell()
         mapAllCells{(row, col, cell) in
             cell.letter = self.letterAt(ALPHABET30, row*NCOLUMNS + col)
             switch (col) {
             case 1:
-                cell.background = CONTAINS_MATCH_COLOR
+                cell.state = .contains_match
             case 2:
-                cell.background = POSITION_MATCH_COLOR
+                cell.state = .contains_and_place_match
             default:
-                cell.background = .black
+                cell.state = .populated
             }
             if (row == 4) {
                 cell.somersaultForJoy(delay: 1)
@@ -173,29 +171,26 @@ class Wordle: NSObject {
             
         if ALPHABET.contains(input) {
             selectedCell!.letter = input
+            selectedCell!.state = .populated
+            selectedCell = nil
             curCol += 1
             if (curCol < NCOLUMNS) {
                 selectCell(curRow, curCol)
-            } else { // end of row condition
-                closeSelectCell()
             }
+            //else, leave no cell selected.
         }
     }
     
     public func handleEnter() {
         if testUp {
             newGame()
-            return
         }
-        if curRowCommitted {
-            if curRowWord() == Answer {
+        else if curRowCommitted {
+            if curRowWord() == Answer || curRow == LAST_ROW {
                 newGame()
             }
-            return
         }
-        if selectedCell == nil && curCol == 0 && Cells[0][0].letter != "" { // allows it after Test, but not after newGame itself.
-            newGame()
-        } else if curCol == NCOLUMNS {
+        else if curCol == NCOLUMNS {
             processRowCompletion()
         }
         // else, ignore
@@ -204,10 +199,7 @@ class Wordle: NSObject {
     public func handleRubout() {  //called by input receiver when Delete pressed
         if curCol == 0 || curRowCommitted || testUp {return}
         BogonReporter.isHidden = true
-        
-        //If not at beginning of line, back up and blank the cell.
         selectCell(curRow, curCol-1)
-        selectedCell!.letter = ""
     }
     
     private func processRowCompletion() {
@@ -224,7 +216,6 @@ class Wordle: NSObject {
             if curRow < LAST_ROW {
                 selectCell(curRow + 1, 0)
             } else {
-                closeSelectCell()
                 curRowCommitted = true
                 reveal()
             }
@@ -233,7 +224,6 @@ class Wordle: NSObject {
     }
 
     private func declareVictory() {
-        closeSelectCell()
         hideEmptyCells()
         jumpRowForJoy(row: curRow)
         curRowCommitted = true
@@ -255,12 +245,12 @@ class Wordle: NSObject {
         for (cell, ansChar) in zip(rowCells, Answer) {
             if Character(cell.letter) == ansChar {
                 already_told.insert(cell.letter)
-                cell.background = POSITION_MATCH_COLOR
+                cell.state = .contains_and_place_match
             }
         }
         
         // See if game won; if so, no need to check for oranges.
-        if rowCells.filter({$0.background == POSITION_MATCH_COLOR }).count == NCOLUMNS {
+        if rowCells.filter({$0.state == .contains_and_place_match }).count == NCOLUMNS {
             declareVictory()
             return .COMPLETE
         }
@@ -269,15 +259,15 @@ class Wordle: NSObject {
         for cell in rowCells {
             if Answer.contains(cell.letter) && !already_told.contains(cell.letter) {
                 already_told.insert(cell.letter)
-                cell.background = CONTAINS_MATCH_COLOR
+                cell.state = .contains_match
             }
         }
         
         /* make correct ones somersault for joy */
         for (j, cell) in zip(0...LAST_ROW, rowCells) {
-            if cell.background == POSITION_MATCH_COLOR {
+            if cell.state == .contains_match {
                 cell.somersaultForJoy(delay: j)
-            } else if cell.background == CONTAINS_MATCH_COLOR {
+            } else if cell.state == .contains_and_place_match {
                 cell.pirouetteForJoy(delay: j)
             }
         }
@@ -285,7 +275,7 @@ class Wordle: NSObject {
     }
     
     public func reveal() {
-        closeSelectCell()
+        closeSelectedCell()
         hideEmptyCells()
         BogonReporter.hide()
         Revelator.displayText(Answer)
@@ -297,8 +287,7 @@ class Wordle: NSObject {
         Revelator.hide()
         Answer = Answers.chooseRandom()
         mapAllCells {(_, _, cell) in
-            cell.letter = ""
-            cell.background = .black
+            cell.state = .empty
             cell.isHidden = false
         }
         selectCell(0, 0)
@@ -308,15 +297,15 @@ class Wordle: NSObject {
         (curRow, curCol) = (row, col)
         testUp = false
         curRowCommitted = false
-        closeSelectCell()
+        closeSelectedCell()
         let cell = Cells[row][col]
         selectedCell = cell
-        cell.isSelected = true
+        cell.state = .selected
     }
     
-    private func closeSelectCell() {
+    private func closeSelectedCell() {
         if selectedCell != nil {
-            selectedCell!.isSelected = false
+            selectedCell!.state = .empty
             selectedCell = nil
         }
     }
