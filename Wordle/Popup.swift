@@ -7,22 +7,19 @@
 
 import Cocoa
 
-private let Font = NSFontManager.shared.font(withFamily: "Arial", traits: .boldFontMask, weight: 0, size: 20.0)
+private let FONT_SIZE = 20.0
+private let CORNER_RADIUS = 15.0
+private let Font = NSFontManager.shared.font(withFamily: "Arial", traits: .boldFontMask, weight: 0, size: FONT_SIZE)
 
-private func makeCustomTextControl(frame: NSRect, bgColor: NSColor) -> NSTextField {
-    let control = NSTextField(frame: frame)
+private func makeCustomTextControl(frame: NSRect) -> NSTextField {
+    let frammis = CGRect(origin:NSPoint.zero, size: frame.size)
+    let control = NSTextField(frame: frammis)
     control.textColor = .black
-    control.backgroundColor = bgColor
-    control.drawsBackground = true
+    control.drawsBackground = false
     control.isSelectable = false
     control.font = Font
     control.alignment = .center
     control.isEditable = false
-    
-    /* from web sources, SwiftUI suggestions, and luck.  */
-    control.wantsLayer = true
-    control.clipsToBounds = true
-    control.layer?.cornerRadius = 15.0
 
     return control
 }
@@ -34,10 +31,15 @@ class PopupView: NSView {
     required init?(coder decoder: NSCoder) {
         super.init(coder: decoder)
     }
+    
 
-    init(frame frameRect: NSRect, color: NSColor) {
+    init(frame frameRect: NSRect, color: CGColor) { //why CG not NS??
         super.init(frame: frameRect)
-        Text = makeCustomTextControl(frame:frameRect, bgColor:color)
+        Text = makeCustomTextControl(frame:frameRect)
+        self.wantsLayer = true
+        self.layer?.backgroundColor = color
+        self.clipsToBounds = true
+        self.layer?.cornerRadius = CORNER_RADIUS
         addSubview(Text)
         hide()
     }

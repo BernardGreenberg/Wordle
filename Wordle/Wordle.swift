@@ -45,25 +45,29 @@ class Wordle: NSObject {
     }
 
     init (view: NSView) {
-        /* Have to create before super.init() call*/
+        
+        /* Have to create these before super.init() call, or Swift will force them to be Optiona.  */
+        let dsz = Double(CELL_SIZE)
+        func createPopup(width : CGFloat, x: CGFloat, color:CGColor) -> PopupView {
+            let popupH = 0.5 * dsz
+            let popupY = view.frame.height - dsz * 4.8 - popupH
+            return PopupView(frame:CGRect(origin: CGPoint(x: x, y: popupY), size: CGSize(width: width, height:popupH)),
+                             color: color)
+        }
 
-        Revelator = PopupView(frame: CGRect(origin:CGPoint(x:45, y: 50.0),
-                                            size:CGSize(width:100, height:40)),
-                              color: NSColor(red:0, green:0.85, blue:0, alpha: 1))
-        BogonReporter = PopupView(frame: CGRect(origin:CGPoint(x:20, y:50), 
-                                                size:CGSize(width:256, height:40)),
-                                  color: .systemPink)
+        Revelator = createPopup(width: 100, x: 1.7*dsz, color: CGColor(red:0, green: 0.85, blue:0, alpha: 1))
+        BogonReporter = createPopup(width: 256.0, x: 30, color: CGColor(red: 1.0, green: 0.5, blue: 0.5, alpha: 1))
 
         super.init()
-        
-        /* Create the cells, position and adopt them, and save in array */
-        createCells(view)
         
         if !readVocabularyFiles() {
             NSApplication.shared.terminate(self)
             return
         }
 
+        /* Create the cells, position and adopt them, and save in array */
+        createCells(view)
+        
         /* Now adopt the info popups */
         view.addSubview(Revelator)
         view.addSubview(BogonReporter)
