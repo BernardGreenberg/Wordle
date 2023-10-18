@@ -25,4 +25,4 @@ Cmd-Q (or the red "close" dot or the menu command) can be used to quit.
 
 Version 1.1, 18 October 2023
 
-Unlike the NYT model, a teal "anxiety dot" begins flashing in the lower-right corner of the fifth letter of a word just entered, but not yet committed.  This is because there is no yellow "input selection" box in that state, and it looks "inactive".  Of course, you can **Delete** that or earlier characters, oo. If, at attempted committal, the word is found to be "not a word", the dot remains.
+Unlike the NYT model, a teal "anxiety dot" begins flashing in the lower-right corner of the fifth letter of a word just entered, but not yet committed.  This is because there is no yellow "input selection" box in that state, and it looks "inactive".  Of course, you can **Delete** that or earlier characters, too. If, at attempted committal, the word is found to be "not a word", the dot remains.
