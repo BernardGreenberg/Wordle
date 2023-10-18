@@ -17,9 +17,13 @@ Just type lower-case letters at it -- they get upper-cased as displayed. **Delet
 Once a line is "committed", so to speak, by being approved when **Return** is typed, you cannot go back and alter it.
 If you guess the secret answer word, all 5 cells in the row will show green and jump for joy (you get 6 tries).  The game is then "Complete", which means you can't change anything or enter new letters anywhere.
 
-You can, however, officially concede (admit defeat) by hitting the **Reveal** button or menu command (or Cmd-Opt-V) at any time, which will reveal the answer and mark the game "Complete"; you may not resume a given game once the answer is revealed.
-At any time you can also hit **New Game** (Cmd-N or the button), which starts again;  when in the "Complete" state, **Return** does that, too.
+You can, however, officially concede (admit defeat) by hitting the **Reveal** button or menu command (or Cmd-Opt-V) at any time, which will reveal the answer and mark the game "Complete"; you may not resume a given game once the answer is revealed. At any time you can also hit **New Game** (Cmd-N or the button), which starts again;  when in the "Complete" state, **Return** does that, too.
 
 "Cmd-Opt-T" (also in the "View" menu) (test) fills the array with the alphabet and a 4-letter Greek cryptogram (5⨉6=26+4) and demonstrates all the acrobatics. **New Game** can be used when bored with it.
 
 Cmd-Q (or the red "close" dot or the menu command) can be used to quit.
+
+Version 1.1, 18 October 2023
+
+Unlike the NYT model, a teal "anxiety dot" begins flashing in the lower-right corner of the fifth letter of a word just entered, but not yet committed.  This is because there is no yellow "input selection" box in that state, and it looks "inactive".  Of course, you can **Delete** that or earlier characters, too. If, at attempted committal, the word is found to be "not a word", the dot remains.
+
