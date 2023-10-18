@@ -42,7 +42,7 @@ private var stateColor : [CellState : NSColor] = [
 //Meaning of flashing: you must type "Enter" to try to commit this word.
 //Need a whole NSView class -- "just draw the dot", as the box is drawn,
 //doesn't work because the text field subview is drawn over it.
-//A childed NSView competes "im the same league", as it were....
+//A childed NSView competes "in the same league", as it were....
 final class IndicatorDotView : NSView {
     var indicatorOn = false
     var theTimer : Timer?
@@ -130,7 +130,6 @@ final class CellView: NSView  {
         super.init(frame: frameRect)
         Text = makeCustomTextControl()
         addSubview(Text)
-        installDot()
     }
 
     private func makeCustomTextControl() -> NSTextField {
