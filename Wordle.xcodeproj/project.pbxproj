@@ -35,6 +35,7 @@
 		5BC73BC12AD6C29C00B18D1A /* ViewNibLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewNibLoader.swift; sourceTree = "<group>"; };
 		5BC73BC82AD71EE500B18D1A /* Answers.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = Answers.txt; sourceTree = "<group>"; };
 		5BC73BCA2AD721AA00B18D1A /* Possibles.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = Possibles.csv; sourceTree = "<group>"; };
+		5BCE211E2AE01EAF004157B6 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -51,6 +52,7 @@
 		5BBBCA272ACCA6C30065F808 = {
 			isa = PBXGroup;
 			children = (
+				5BCE211E2AE01EAF004157B6 /* README.md */,
 				5BC73BC02AD6C25800B18D1A /* Auxilia */,
 				5BBBCA322ACCA6C30065F808 /* Wordle */,
 				5BBBCA312ACCA6C30065F808 /* Products */,
