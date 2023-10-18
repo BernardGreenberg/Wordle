@@ -179,6 +179,8 @@ class Wordle: NSObject {
             curCol += 1
             if (curCol < NCOLUMNS) {
                 selectCell(curRow, curCol)
+            } else {
+                Cells[curRow][LAST_COLUMN].state = .indicating
             }
             //else, leave no cell selected.
         }
@@ -251,6 +253,10 @@ class Wordle: NSObject {
                 already_told.insert(cell.letter)
                 cell.state = .contains_and_place_match
             }
+        }
+        
+        if rowCells[LAST_COLUMN].state == .indicating { // wasn't changed above
+            rowCells[LAST_COLUMN].state = .populated
         }
         
         // See if game won; if so, no need to check for oranges.
