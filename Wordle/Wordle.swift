@@ -245,18 +245,15 @@ class Wordle: NSObject {
             return .BOGUS
         }
         
+        rowCells[LAST_COLUMN].state = .populated //turn off .indicating. No cells colored yet in this row
+
         var already_told: Set<String> = [] /*trick to prevent multiple assessments of same letter, Nanny! */
-        
         /* Color such greens as should be */
         for (cell, ansChar) in zip(rowCells, Answer) {
             if Character(cell.letter) == ansChar {
                 already_told.insert(cell.letter)
                 cell.state = .contains_and_place_match
             }
-        }
-        
-        if rowCells[LAST_COLUMN].state == .indicating { // wasn't changed above
-            rowCells[LAST_COLUMN].state = .populated
         }
         
         // See if game won; if so, no need to check for oranges.
