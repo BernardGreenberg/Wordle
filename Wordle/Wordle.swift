@@ -14,7 +14,6 @@ let LAST_ROW = 5
 let LAST_COLUMN = NCOLUMNS-1
 let ALPHABET = "abcdefghijklmnopqrstuvwxyz"
 let ALPHABET30 = ALPHABET + "θφγδ"   //θεου φοβος γενει δαιμονια
-let xCF = 1.0/256.0
 
 let CELL_SIZE = 64
 
