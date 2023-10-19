@@ -13,11 +13,11 @@ let NCOLUMNS = 5
 let LAST_ROW = 5
 let LAST_COLUMN = NCOLUMNS-1
 let ALPHABET = "abcdefghijklmnopqrstuvwxyz"
-let ALPHABET30 = ALPHABET + "θφγδ"   //θεου φοβος γενει δαιμονια
+let ALPHABET30 = ALPHABET + "θφγδ"   //θεου φοβος γενει δαιμονας
 
 let CELL_SIZE = 64
 
-enum rowEval {case BOGUS, GOOD, COMPLETE}
+enum rowEval {case BOGUS, ADVANCE, LOSE6, COMPLETE}
 
 class Wordle: NSObject {
     var Cells : [[CellView]] = []  //"two dimensional array" of cells [row][col]
@@ -45,7 +45,7 @@ class Wordle: NSObject {
 
     init (view: NSView) {
         
-        /* Have to create these before super.init() call, or Swift will force them to be Optiona.  */
+        /* Have to create these before super.init() call, or Swift will force them to be Optional.  */
         let dsz = Double(CELL_SIZE)
         func createPopup(width : Double, x: Double, color: NSColor) -> PopupView {
             let popupH = 0.5 * dsz
@@ -205,37 +205,26 @@ class Wordle: NSObject {
 
     public func handleRubout() {  //called by input receiver when Delete pressed
         if curCol == 0 || curRowCommitted || Revelator.isVisible || testUp {return}
-        BogonReporter.isHidden = true
+        BogonReporter.hide()
         selectCell(curRow, curCol-1)
     }
     
     private func processRowCompletion() {
-        // Extract the word lying in the current row...
-        let rowCells = Cells[curRow]
-        switch (EvaluateRow(rowCells: rowCells)) // Mark such oranges and greens as exist
+        switch (EvaluateRow(rowCells: Cells[curRow])) // Mark such oranges and greens as exist
         {
         case .COMPLETE:
-            return
+            hideEmptyCells()
+            jumpRowForJoy(row: curRow)
         case .BOGUS:
             BogonReporter.displayText("Unknown word: " + curRowWord())
             jiggleRowForDisappointment(row: curRow)
-        case .GOOD: do {
-            if curRow < LAST_ROW {
-                selectCell(curRow + 1, 0)
-            } else {
-                curRowCommitted = true
-                reveal()
-            }
-        }
+        case .ADVANCE:
+            selectCell(curRow + 1, 0)
+        case .LOSE6:   //used up all guesses ... too bad ...
+            reveal()
         }
     }
 
-    private func declareVictory() {
-        hideEmptyCells()
-        jumpRowForJoy(row: curRow)
-        curRowCommitted = true
-    }
-    
     private func curRowWord() -> String {
         return Cells[curRow].map(\.letter).joined()
     }
@@ -247,6 +236,7 @@ class Wordle: NSObject {
         }
         
         rowCells[LAST_COLUMN].state = .populated //turn off .indicating. No cells colored yet in this row
+        curRowCommitted = true  //"Commitment" means reaching this point.
 
         var already_told: Set<String> = [] /*trick to prevent multiple assessments of same letter, Nanny! */
         /* Color such greens as should be */
@@ -259,11 +249,10 @@ class Wordle: NSObject {
         
         // See if game won; if so, no need to check for oranges.
         if rowCells.filter({$0.state == .contains_and_place_match }).count == NCOLUMNS {
-            declareVictory()
             return .COMPLETE
         }
         
-        // Color such oranges as needed
+        // Color such oranges as needed, as it were
         for cell in rowCells {
             if Answer.contains(cell.letter) && !already_told.contains(cell.letter) {
                 already_told.insert(cell.letter)
@@ -279,7 +268,8 @@ class Wordle: NSObject {
                 cell.pirouetteForJoy(delay: j)
             }
         }
-        return .GOOD
+        
+        return if curRow < LAST_ROW {.ADVANCE} else {.LOSE6}
     }
     
     public func reveal() {
