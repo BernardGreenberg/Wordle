@@ -47,7 +47,7 @@ class Wordle: NSObject {
         
         /* Have to create these before super.init() call, or Swift will force them to be Optiona.  */
         let dsz = Double(CELL_SIZE)
-        func createPopup(width : CGFloat, x: CGFloat, color: NSColor) -> PopupView {
+        func createPopup(width : Double, x: Double, color: NSColor) -> PopupView {
             let popupH = 0.5 * dsz
             let popupY = view.frame.height - dsz * 4.8 - popupH
             return PopupView(frame: NSRect(origin: NSPoint(x: x, y: popupY), size: NSSize(width: width, height:popupH)),
@@ -93,7 +93,7 @@ class Wordle: NSObject {
     private func createCellAtRowCol(row: Int, col:Int, view: NSView) -> CellView {
         let x = col*CELL_SIZE
         let y = Int(view.frame.height) - row*CELL_SIZE - CELL_SIZE // -CELL_SIZE is because we're positioning its bottom
-        return CellView(frame: NSRect(origin:CGPoint(x: x, y: y), size:CGSize(width: CELL_SIZE, height:CELL_SIZE)))
+        return CellView(frame: NSRect(origin:NSPoint(x: x, y: y), size:NSSize(width: CELL_SIZE, height:CELL_SIZE)))
     }
     
     private func readVocabularyFiles() ->Bool {
