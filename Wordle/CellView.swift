@@ -9,6 +9,8 @@ import Cocoa
 
 private let SELECTED_FRAME_COLOR = NSColor(red: 1.00, green: 1.00, blue: 0.00, alpha: 1)
 private let NORMAL_FRAME_COLOR = NSColor(red: 0.50, green: 0.50, blue: 0.50, alpha: 1)
+private let FRAME_LINE_WIDTH = 2.0
+
 private let xCF = 1.0/255.0
 private let CONTAINS_MATCH_COLOR = NSColor(red:177.0*xCF, green:159.0*xCF, blue:60.0*xCF, alpha: 1)
 private let POSITION_MATCH_COLOR = NSColor(red:0*xCF, green:128.0*xCF, blue:0.0*xCF, alpha: 1)
@@ -81,33 +83,24 @@ final class CellView: NSView  {
     var State : CellState = .empty
     var Letter : String = ""
     weak var Dot : IndicatorDotView?
-    var frameBox : NSRect!
+    var outlineBox : NSRect!
+    var frameColor : NSColor = NORMAL_FRAME_COLOR
 
     static var Font = NSFontManager.shared.font(withFamily: "Arial", traits: .boldFontMask, weight: 0, size: FONT_SIZE)
 
     var letter: String { get {Letter} set(x) {self.setLetter(letter: x)}}
     var state : CellState {get {State} set (new_state) {self.setState(new_state:new_state)}}
 
-    private func drawAnyBox(_ path: NSBezierPath, _ box: NSRect) {
-        path.move(to: box.origin)
-        path.line(to: NSPoint(x: box.origin.x, y: box.height))
-        path.line(to: NSPoint(x: box.width, y: box.height))
-        path.line(to: NSPoint(x: box.width, y: box.origin.y))
-        path.line(to: box.origin)
-    }
-                  
-    private func drawBoundingBox() {
-        /* https://stackoverflow.com/questions/38079917/drawing-in-cocoa-swift */
-        let path = NSBezierPath()
-        path.lineWidth = 2.0
-        (State == .selected ? SELECTED_FRAME_COLOR : NORMAL_FRAME_COLOR).set()
-        drawAnyBox(path, frameBox)
+    private func drawOutlineBox() {
+        let path = NSBezierPath(rect: outlineBox)  //life can be so easy!
+        path.lineWidth = FRAME_LINE_WIDTH
+        frameColor.set()
         path.stroke()
     }
 
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)
-        drawBoundingBox()
+        drawOutlineBox()
     }
     
     required init?(coder decoder: NSCoder) {
@@ -116,13 +109,13 @@ final class CellView: NSView  {
 
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
-        frameBox = NSInsetRect(bounds, BOX_INSET, BOX_INSET)
-        Text = makeCustomTextControl()
+        outlineBox = NSInsetRect(bounds, BOX_INSET, BOX_INSET)
+        Text = makeCustomTextControl(frame:NSInsetRect(bounds, CONTROL_INSET, CONTROL_INSET))
         addSubview(Text)
     }
     
-    private func makeCustomTextControl() -> NSTextField {
-        let control = NSTextField(frame: NSInsetRect(bounds, CONTROL_INSET, CONTROL_INSET))
+    private func makeCustomTextControl(frame: NSRect) -> NSTextField {
+        let control = NSTextField(frame: frame)
         control.textColor = .white
         control.drawsBackground = true
         control.isSelectable = false
@@ -148,6 +141,7 @@ final class CellView: NSView  {
         if State == .indicating {
             Dot!.start()
         }
+        frameColor = (State == .selected) ? SELECTED_FRAME_COLOR : NORMAL_FRAME_COLOR
         setNeedsDisplay(frame)
     }
     
