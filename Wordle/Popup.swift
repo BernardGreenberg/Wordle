@@ -33,11 +33,11 @@ class PopupView: NSView {
     }
     
 
-    init(frame frameRect: NSRect, color: CGColor) { //why CG not NS??
+    init(frame frameRect: NSRect, color: NSColor) { //why CG not NS??
         super.init(frame: frameRect)
         Text = makeCustomTextControl(frame:frameRect)
         self.wantsLayer = true
-        self.layer?.backgroundColor = color
+        self.layer?.backgroundColor = color.cgColor
         self.clipsToBounds = true
         self.layer?.cornerRadius = CORNER_RADIUS
         addSubview(Text)

@@ -7,8 +7,8 @@
 
 import Cocoa
 
-private let SELECTED_FRAME_COLOR = CGColor(red: 1.00, green: 1.00, blue: 0.00, alpha: 1)
-private let NORMAL_FRAME_COLOR = CGColor(red: 0.50, green: 0.50, blue: 0.50, alpha: 1)
+private let SELECTED_FRAME_COLOR = NSColor(red: 1.00, green: 1.00, blue: 0.00, alpha: 1)
+private let NORMAL_FRAME_COLOR = NSColor(red: 0.50, green: 0.50, blue: 0.50, alpha: 1)
 private let xCF = 1.0/255.0
 private let CONTAINS_MATCH_COLOR = NSColor(red:177.0*xCF, green:159.0*xCF, blue:60.0*xCF, alpha: 1)
 private let POSITION_MATCH_COLOR = NSColor(red:0*xCF, green:128.0*xCF, blue:0.0*xCF, alpha: 1)
@@ -32,7 +32,7 @@ enum CellState {
 
 private var stateColor : [CellState : NSColor] = [
     .empty : .black,
-    .selected : .black,
+    .selected : .black,    /// ,selected implies no content, just like .empty
     .populated : .black,
     .indicating : .black,  // as in lever frame M "indication magnet", AS it were
     .contains_match : CONTAINS_MATCH_COLOR,
@@ -50,13 +50,12 @@ final class IndicatorDotView : NSView {
         super.draw(dirtyRect)
         if indicatorOn {
             //https://stackoverflow.com/questions/49085717/drawing-a-circle-in-swift-macos
-            let context = NSGraphicsContext.current!.cgContext
-            context.setFillColor(NSColor.systemTeal.cgColor)
-            let innerFrame = NSRect(origin:NSPoint.zero, size:frame.size)
-            context.fillEllipse(in: innerFrame)
+            NSColor.systemTeal.setFill()
+            NSBezierPath(ovalIn: bounds).fill()
         }
     }
     public func start () {
+        stop() // just in case
         indicatorOn = true
         theTimer = Timer.scheduledTimer(timeInterval: DOT_PHASE_TIME,
                                         target: self, selector: #selector(timerHandler),
@@ -89,37 +88,24 @@ final class CellView: NSView  {
     var letter: String { get {Letter} set(x) {self.setLetter(letter: x)}}
     var state : CellState {get {State} set (new_state) {self.setState(new_state:new_state)}}
 
-    private func drawBox() {
+    private func drawBoundingBox() {
         /* https://stackoverflow.com/questions/38079917/drawing-in-cocoa-swift */
-        guard let context = NSGraphicsContext.current?.cgContext else{
-            return
-        }
-        context.beginPath()
-        context.setLineWidth(2.0)
+
         let (W, H, BI) = (Int(self.frame.width), Int(self.frame.height), BOX_INDENT)
-        context.move(to:    CGPoint(x: BI,   y: BI))
-        context.addLine(to: CGPoint(x: BI,   y: H-BI))
-        context.addLine(to: CGPoint(x: W-BI, y: H-BI))
-        context.addLine(to: CGPoint(x: W-BI, y: BI))
-        context.addLine(to: CGPoint(x: BI,   y: BI))
-        context.setStrokeColor(State == .selected ? SELECTED_FRAME_COLOR : NORMAL_FRAME_COLOR)
-        context.strokePath()
-    }
-    
-    private func installDot() {
-        let diameter = DOT_DIAMETER_FRACTION*frame.width
-        let wall_offset = DOT_WALL_OFFSET*frame.width
-        let box = NSRect(origin: NSPoint(x: frame.width-wall_offset-diameter,
-                                          y: 0+wall_offset),
-                          size: NSSize(width:diameter, height:diameter))
-        let dot = IndicatorDotView(frame: box)
-        addSubview(dot) //don't set weak var until childed
-        Dot = dot
+        let path = NSBezierPath()
+        path.lineWidth = 2.0
+        path.move(to: NSPoint(x: BI,   y: BI))
+        path.line(to: NSPoint(x: BI,   y: H-BI))
+        path.line(to: NSPoint(x: W-BI, y: H-BI))
+        path.line(to: NSPoint(x: W-BI, y: BI))
+        path.line(to: NSPoint(x: BI,   y: BI))
+        (State == .selected ? SELECTED_FRAME_COLOR : NORMAL_FRAME_COLOR).set()
+        path.stroke()
     }
 
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)
-        drawBox()
+        drawBoundingBox()
     }
     
     required init?(coder decoder: NSCoder) {
@@ -161,22 +147,23 @@ final class CellView: NSView  {
             setLetter(letter:"")
         }
         if State == .indicating {
-            startIndicating()
+            Dot!.start()
         }
         setNeedsDisplay(frame)
     }
     
-    private func startIndicating() {
-        if Dot == nil {
-            installDot()
-        } else {
-            Dot!.stop() // shouldn't really happen.
-        }
-        Dot!.start()
-    }
-
 
     /* API */
+    
+    public func endowWithIndicator() {
+        let wallOffset = DOT_WALL_OFFSET*frame.width
+        let boxSize = NSSize(width:DOT_DIAMETER_FRACTION*frame.width, height:DOT_DIAMETER_FRACTION*frame.width)
+        let box = NSRect(origin: NSPoint(x: frame.width - wallOffset - boxSize.width,
+                                         y: wallOffset), size: boxSize)
+        let dot = IndicatorDotView(frame: box)
+        addSubview(dot) //don't set weak var until childed
+        Dot = dot
+    }
     
     /* used for animations */
     public func setTransform (_ xform : CGAffineTransform?) {

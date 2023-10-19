@@ -47,15 +47,15 @@ class Wordle: NSObject {
         
         /* Have to create these before super.init() call, or Swift will force them to be Optiona.  */
         let dsz = Double(CELL_SIZE)
-        func createPopup(width : CGFloat, x: CGFloat, color:CGColor) -> PopupView {
+        func createPopup(width : CGFloat, x: CGFloat, color: NSColor) -> PopupView {
             let popupH = 0.5 * dsz
             let popupY = view.frame.height - dsz * 4.8 - popupH
-            return PopupView(frame:CGRect(origin: CGPoint(x: x, y: popupY), size: CGSize(width: width, height:popupH)),
+            return PopupView(frame: NSRect(origin: NSPoint(x: x, y: popupY), size: NSSize(width: width, height:popupH)),
                              color: color)
         }
 
-        Revelator = createPopup(width: 100, x: 1.7*dsz, color: CGColor(red:0, green: 0.85, blue:0, alpha: 1))
-        BogonReporter = createPopup(width: 256.0, x: 30, color: CGColor(red: 1.0, green: 0.5, blue: 0.5, alpha: 1))
+        Revelator = createPopup(width: 100, x: 1.7*dsz, color: NSColor.systemGreen)
+        BogonReporter = createPopup(width: 256.0, x: 30, color: NSColor(red: 1.0, green: 0.5, blue: 0.5, alpha: 1))
 
         super.init()
         
@@ -85,6 +85,7 @@ class Wordle: NSObject {
                 Row.append(cell)
                 view.addSubview(cell)
             }
+            Row.last?.endowWithIndicator()
             Cells.append(Row)
         }
     }
