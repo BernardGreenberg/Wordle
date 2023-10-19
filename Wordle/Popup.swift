@@ -12,8 +12,7 @@ private let CORNER_RADIUS = 15.0
 private let Font = NSFontManager.shared.font(withFamily: "Arial", traits: .boldFontMask, weight: 0, size: FONT_SIZE)
 
 private func makeCustomTextControl(frame: NSRect) -> NSTextField {
-    let frammis = CGRect(origin:NSPoint.zero, size: frame.size)
-    let control = NSTextField(frame: frammis)
+    let control = NSTextField(frame: frame)
     control.textColor = .black
     control.drawsBackground = false
     control.isSelectable = false
@@ -33,9 +32,9 @@ class PopupView: NSView {
     }
     
 
-    init(frame frameRect: NSRect, color: NSColor) { //why CG not NS??
+    init(frame frameRect: NSRect, color: NSColor) {
         super.init(frame: frameRect)
-        Text = makeCustomTextControl(frame:frameRect)
+        Text = makeCustomTextControl(frame:bounds)  //bounds, not frame!!
         self.wantsLayer = true
         self.layer?.backgroundColor = color.cgColor
         self.clipsToBounds = true
