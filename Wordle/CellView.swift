@@ -13,8 +13,8 @@ private let xCF = 1.0/255.0
 private let CONTAINS_MATCH_COLOR = NSColor(red:177.0*xCF, green:159.0*xCF, blue:60.0*xCF, alpha: 1)
 private let POSITION_MATCH_COLOR = NSColor(red:0*xCF, green:128.0*xCF, blue:0.0*xCF, alpha: 1)
 
-private let BOX_INDENT = 3
-private let CONTROL_INDENT = 5.0
+private let BOX_INSET = 3.0
+private let CONTROL_INSET = 7.0
 private let FONT_SIZE = 40.0 // not worth recreating font from dimensions every time a cell is created.
 
 private let DOT_DIAMETER_FRACTION = 0.2
@@ -49,7 +49,6 @@ final class IndicatorDotView : NSView {
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)
         if indicatorOn {
-            //https://stackoverflow.com/questions/49085717/drawing-a-circle-in-swift-macos
             NSColor.systemTeal.setFill()
             NSBezierPath(ovalIn: bounds).fill()
         }
@@ -82,24 +81,27 @@ final class CellView: NSView  {
     var State : CellState = .empty
     var Letter : String = ""
     weak var Dot : IndicatorDotView?
+    var frameBox : NSRect!
 
     static var Font = NSFontManager.shared.font(withFamily: "Arial", traits: .boldFontMask, weight: 0, size: FONT_SIZE)
 
     var letter: String { get {Letter} set(x) {self.setLetter(letter: x)}}
     var state : CellState {get {State} set (new_state) {self.setState(new_state:new_state)}}
 
+    private func drawAnyBox(_ path: NSBezierPath, _ box: NSRect) {
+        path.move(to: box.origin)
+        path.line(to: NSPoint(x: box.origin.x, y: box.height))
+        path.line(to: NSPoint(x: box.width, y: box.height))
+        path.line(to: NSPoint(x: box.width, y: box.origin.y))
+        path.line(to: box.origin)
+    }
+                  
     private func drawBoundingBox() {
         /* https://stackoverflow.com/questions/38079917/drawing-in-cocoa-swift */
-
-        let (W, H, BI) = (Int(self.frame.width), Int(self.frame.height), BOX_INDENT)
         let path = NSBezierPath()
         path.lineWidth = 2.0
-        path.move(to: NSPoint(x: BI,   y: BI))
-        path.line(to: NSPoint(x: BI,   y: H-BI))
-        path.line(to: NSPoint(x: W-BI, y: H-BI))
-        path.line(to: NSPoint(x: W-BI, y: BI))
-        path.line(to: NSPoint(x: BI,   y: BI))
         (State == .selected ? SELECTED_FRAME_COLOR : NORMAL_FRAME_COLOR).set()
+        drawAnyBox(path, frameBox)
         path.stroke()
     }
 
@@ -114,16 +116,13 @@ final class CellView: NSView  {
 
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
+        frameBox = NSInsetRect(bounds, BOX_INSET, BOX_INSET)
         Text = makeCustomTextControl()
         addSubview(Text)
     }
-
+    
     private func makeCustomTextControl() -> NSTextField {
-        var innerRect = self.frame
-        innerRect.origin = CGPoint(x: CONTROL_INDENT, y: CONTROL_INDENT)
-        innerRect.size.width -= 2*CONTROL_INDENT
-        innerRect.size.height -= 2*CONTROL_INDENT
-        let control = NSTextField(frame: innerRect)
+        let control = NSTextField(frame: NSInsetRect(bounds, CONTROL_INSET, CONTROL_INSET))
         control.textColor = .white
         control.drawsBackground = true
         control.isSelectable = false
