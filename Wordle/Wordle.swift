@@ -151,9 +151,9 @@ class Wordle: NSObject {
                 cell.state = .populated
             }
             if (row == 4) {
-                cell.somersaultForJoy(delay: 1)
+                SomersaultForJoy(cell).run(delay: 1)
             } else if (row == 1) {
-                cell.pirouetteForJoy(delay: 1)
+                PirouetteForJoy(cell).run(delay: 1)
             }
             cell.isHidden = false
         }
@@ -242,11 +242,11 @@ class Wordle: NSObject {
             if Character(cell.letter) == ansChar {
                 already_told.insert(cell.letter)
                 cell.state = .contains_and_place_match
-                cell.pirouetteForJoy(delay: j)
+                PirouetteForJoy(cell).run(delay: j)
             } else if Answer.contains(cell.letter) && !already_told.contains(cell.letter) {
                 already_told.insert(cell.letter)
                 cell.state = .contains_match
-                cell.somersaultForJoy(delay: j)
+                SomersaultForJoy(cell).run(delay: j)
             }
         }
     }
@@ -289,13 +289,13 @@ class Wordle: NSObject {
     
     private func jumpRowForJoy(row: Int) {
         for (cell, i) in zip(Cells[row], 0...LAST_COLUMN) {
-            cell.jumpForJoy(delay: i)
+            JumpForJoy(cell).run(delay: i)
         }
     }
     
     private func jiggleRowForDisappointment(row: Int) {
         for cell in Cells[row] {
-            cell.jiggleForDisappointment()
+            JiggleForDisappointment(cell).run(delay: 0)
         }
     }
 }

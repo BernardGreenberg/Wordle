@@ -159,33 +159,13 @@ final class CellView: NSView  {
     }
     
     /* used for animations */
-    public func setTransform (_ xform : CGAffineTransform?) {
+    public func setTransform (_ transform : CGAffineTransform?) {
         /* Cocoa knows it needs to redisplay if we change these vars */
-        guard xform != nil else {
+        guard transform != nil else {
             wantsLayer = false
             return
         }
         wantsLayer = true
-        layer?.setAffineTransform(xform!)
+        layer?.setAffineTransform(transform!)
     }
-    
-    public func jumpForJoy(delay: Int) {
-        JumpForJoy(self).run(delay: delay)
-    }
-    
-    public func somersaultForJoy(delay: Int) {
-        SomersaultForJoy(self).run(delay: delay)
-    }
-    
-    public func pirouetteForJoy(delay: Int) {
-        PirouetteForJoy(self).run(delay: delay)
-    }
-    
-    public func jiggleForDisappointment() {
-        JiggleForDisappointment(self).run(delay: 0)
-    }
-    
 }
-
-
-
