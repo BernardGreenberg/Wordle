@@ -106,11 +106,11 @@ class Wordle: NSObject {
             Answers = try Database(resourceName: "Answers.txt")       //words that can be used as answers
             Possibles = try Database(resourceName: "Possibles.csv")   //words that can be used as guesses (many more)
         }
-        catch MyError.runtimeError(let errorMessage) {
-            self.alert(message: "Database Open error", messageBody: errorMessage)
+        catch WordleDatabaseError.resourceError(let generic, let specific) {
+            self.alert(message: "Database resource error", messageBody: generic + "\n" + specific)
             return false
         } catch { /* need this or throwers above will not compile, as error processing not "comprehensive" ... */
-            self.alert(message: "Database open random error", messageBody: error.localizedDescription)
+            self.alert(message: "Database open error", messageBody: error.localizedDescription)
             return false
         }
         Possibles.merge(Answers) //there are about 50 words in Answers not in Possibles, mainly modernisms

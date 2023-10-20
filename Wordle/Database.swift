@@ -7,8 +7,8 @@
 
 import Foundation
 
-enum MyError: Error {
-    case runtimeError(String)
+enum WordleDatabaseError: Error {
+    case resourceError(String, String)
 }
 
 class Database {
@@ -38,10 +38,10 @@ class Database {
         }
     }
     
-    func openResource(_ fname: String) throws {
-        let path = Bundle.main.path(forResource: fname, ofType:nil)
+    func openResource(_ resourceName: String) throws {
+        let path = Bundle.main.path(forResource: resourceName, ofType:nil)
         if (path == nil) {
-            throw MyError.runtimeError("Can't find resource " + fname)
+            throw WordleDatabaseError.resourceError("Can't find resource:", resourceName)
         }
         try open(path!)
     }
