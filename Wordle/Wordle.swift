@@ -215,13 +215,15 @@ class Wordle: NSObject {
             jiggleRowForDisappointment(row: curRow)
             return
         }
+        let victory = (guess == Answer)  // precalculate victory
 
         curRowCommitted = true  //"Commitment" means reaching this point -- prevents Enter from being hit twice
         Cells[curRow][LAST_COLUMN].state = .populated //turn off .indicating. No cells colored yet in this row.
-        colorColorableCells()   //Do the colorings and animations.
+        
+        colorColorableCells(victory: victory)   //Do the colorings and animations (don't animate if victory)
 
         /* Evaluate and act on new game state. */
-        if guess == Answer {                                // Victory!
+        if victory {
             hideEmptyCells()
             jumpRowForJoy(row: curRow)
         } else  if curRow == LAST_ROW {                     // 6th-row defeat, reveal the answer
@@ -236,14 +238,16 @@ class Wordle: NSObject {
     }
 
     /* Color and animate current row based on agreement with Answer */
-    private func colorColorableCells() {
+    private func colorColorableCells(victory: Bool) {
         var already_told: Set<String> = [] /*trick to prevent multiple assessments of same letter, Nanny! */
         // Must do this in 2 passes, or oranges will appear with green later on for the same letter.
         for ((cell, ansChar), j) in zip(zip(Cells[curRow], Answer), 0...LAST_ROW) {  // no zip for > 2 args
             if Character(cell.letter) == ansChar {
                 already_told.insert(cell.letter)
                 cell.state = .contains_and_place_match
-                PirouetteForJoy(cell).run(delay: j)
+                if !victory{
+                    PirouetteForJoy(cell).run(delay: j)
+                }
             }
         }
         for (cell, j) in zip (Cells[curRow], 0...LAST_ROW) {
