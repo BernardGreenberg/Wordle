@@ -17,8 +17,6 @@ let ALPHABET30 = ALPHABET + "θφγδ"   //θεου φοβος γενει δαι
 
 let CELL_SIZE = 64
 
-enum rowEval {case BOGUS, ADVANCE, LOSE6, COMPLETE}
-
 class Wordle: NSObject {
     var Cells : [[CellView]] = []  //"two dimensional array" of cells [row][col]
     var Revelator : PopupView
@@ -50,7 +48,8 @@ class Wordle: NSObject {
         func createPopup(width : Double, x: Double, color: NSColor) -> PopupView {
             let popupH = 0.5 * dsz
             let popupY = view.frame.height - dsz * 4.8 - popupH
-            return PopupView(frame: NSRect(origin: NSPoint(x: x, y: popupY), size: NSSize(width: width, height:popupH)),
+            return PopupView(frame: NSRect(origin: NSPoint(x: x, y: popupY),
+                                           size: NSSize(width: width, height:popupH)),
                              color: color)
         }
 
@@ -209,19 +208,26 @@ class Wordle: NSObject {
         selectCell(curRow, curCol-1)
     }
     
-    private func processRowCompletion() {
-        switch (EvaluateRow(rowCells: Cells[curRow])) // Mark such oranges and greens as exist
-        {
-        case .COMPLETE:
+    private func processRowCompletion() {   //first-time Enter in last column
+        let guess = curRowWord()
+        if !Possibles.contains(word: guess) {               //Not a known word.
+            BogonReporter.displayText("Unknown word: " + guess)
+            jiggleRowForDisappointment(row: curRow)
+            return
+        }
+
+        curRowCommitted = true  //"Commitment" means reaching this point -- prevents Enter from being hit twice
+        Cells[curRow][LAST_COLUMN].state = .populated //turn off .indicating. No cells colored yet in this row.
+        colorColorableCells()   //Do the colorings and animations.
+
+        /* Evaluate and act on new game state. */
+        if guess == Answer {                                // Victory!
             hideEmptyCells()
             jumpRowForJoy(row: curRow)
-        case .BOGUS:
-            BogonReporter.displayText("Unknown word: " + curRowWord())
-            jiggleRowForDisappointment(row: curRow)
-        case .ADVANCE:
+        } else  if curRow == LAST_ROW {                     // 6th-row defeat, reveal the answer
+            revealAnswer()
+        } else {                                            // Otherwise, enable the next guess
             selectCell(curRow + 1, 0)
-        case .LOSE6:   //used up all guesses ... too bad ...
-            reveal()
         }
     }
 
@@ -229,50 +235,23 @@ class Wordle: NSObject {
         return Cells[curRow].map(\.letter).joined()
     }
 
-    /* Decide how to color current row based on agreement with Answer */
-    private func EvaluateRow(rowCells: [CellView]) -> rowEval {
-        if !Possibles.contains(word: curRowWord()) {
-            return .BOGUS
-        }
-        
-        rowCells[LAST_COLUMN].state = .populated //turn off .indicating. No cells colored yet in this row
-        curRowCommitted = true  //"Commitment" means reaching this point.
-
+    /* Color and animate current row based on agreement with Answer */
+    private func colorColorableCells() {
         var already_told: Set<String> = [] /*trick to prevent multiple assessments of same letter, Nanny! */
-        /* Color such greens as should be */
-        for (cell, ansChar) in zip(rowCells, Answer) {
+        for ((cell, ansChar), j) in zip(zip(Cells[curRow], Answer), 0...LAST_ROW) {  // no zip for > 2 args
             if Character(cell.letter) == ansChar {
                 already_told.insert(cell.letter)
                 cell.state = .contains_and_place_match
-            }
-        }
-        
-        // See if game won; if so, no need to check for oranges.
-        if rowCells.filter({$0.state == .contains_and_place_match }).count == NCOLUMNS {
-            return .COMPLETE
-        }
-        
-        // Color such oranges as needed, as it were
-        for cell in rowCells {
-            if Answer.contains(cell.letter) && !already_told.contains(cell.letter) {
+                cell.pirouetteForJoy(delay: j)
+            } else if Answer.contains(cell.letter) && !already_told.contains(cell.letter) {
                 already_told.insert(cell.letter)
                 cell.state = .contains_match
-            }
-        }
-        
-        /* make correct ones somersault for joy */
-        for (j, cell) in zip(0...LAST_ROW, rowCells) {
-            if cell.state == .contains_match {
                 cell.somersaultForJoy(delay: j)
-            } else if cell.state == .contains_and_place_match {
-                cell.pirouetteForJoy(delay: j)
             }
         }
-        
-        return if curRow < LAST_ROW {.ADVANCE} else {.LOSE6}
     }
     
-    public func reveal() {
+    public func revealAnswer() {
         closeSelectedCell()
         hideEmptyCells()
         BogonReporter.hide()

@@ -38,7 +38,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     @IBAction func reveal(event: Any) {
-        theWordle.reveal()
+        theWordle.revealAnswer()
     }
     
     @IBAction func testGraphics(event: Any) {
