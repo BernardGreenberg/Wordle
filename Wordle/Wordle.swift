@@ -238,15 +238,21 @@ class Wordle: NSObject {
     /* Color and animate current row based on agreement with Answer */
     private func colorColorableCells() {
         var already_told: Set<String> = [] /*trick to prevent multiple assessments of same letter, Nanny! */
+        // Must do this in 2 passes, or oranges will appear with green later on for the same letter.
         for ((cell, ansChar), j) in zip(zip(Cells[curRow], Answer), 0...LAST_ROW) {  // no zip for > 2 args
             if Character(cell.letter) == ansChar {
                 already_told.insert(cell.letter)
                 cell.state = .contains_and_place_match
                 PirouetteForJoy(cell).run(delay: j)
-            } else if Answer.contains(cell.letter) && !already_told.contains(cell.letter) {
+            }
+        }
+        for (cell, j) in zip (Cells[curRow], 0...LAST_ROW) {
+            if Answer.contains(cell.letter) && !already_told.contains(cell.letter) {
                 already_told.insert(cell.letter)
                 cell.state = .contains_match
-                SomersaultForJoy(cell).run(delay: j)
+            }
+            if cell.state != .contains_and_place_match {
+                SomersaultForJoy(cell).run(delay: j)  //NYT-compatible behavior for inactive letters
             }
         }
     }
