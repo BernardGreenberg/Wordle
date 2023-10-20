@@ -15,7 +15,7 @@ let LAST_COLUMN = NCOLUMNS-1
 let ALPHABET = "abcdefghijklmnopqrstuvwxyz"
 let ALPHABET30 = ALPHABET + "θφγδ"   //θεου φοβος γενει δαιμονας
 
-let CELL_SIZE = 64
+let CELL_SIZE = 64.0
 
 let POPUP_TOP_PLACEMENT_CELLS = 4.75
 let REVELATOR_COLOR = NSColor.systemGreen
@@ -48,14 +48,11 @@ class Wordle: NSObject {
     init (view: NSView) {
         
         /* Have to create these before super.init() call, or Swift will force them to be Optional.  */
-        let dsz = Double(CELL_SIZE)
         func createPopup(width: Double, color: NSColor) -> PopupView {
-            let height = 0.5 * dsz
+            let height = 0.5 * CELL_SIZE
             let x = (view.frame.width - width)/2.0
-            let y = view.frame.height - dsz * POPUP_TOP_PLACEMENT_CELLS - height
-            return PopupView(frame: NSRect(origin: NSPoint(x: x, y: y),
-                                           size: NSSize(width: width, height: height)),
-                             color: color)
+            let y = view.frame.height - CELL_SIZE * POPUP_TOP_PLACEMENT_CELLS - height
+            return PopupView(frame: NSMakeRect(x, y, width, height), color: color)
         }
 
         Revelator = createPopup(width: 100, color: REVELATOR_COLOR)
@@ -95,9 +92,9 @@ class Wordle: NSObject {
     }
 
     private func createCellAtRowCol(row: Int, col:Int, view: NSView) -> CellView {
-        let x = col*CELL_SIZE
-        let y = Int(view.frame.height) - row*CELL_SIZE - CELL_SIZE // -CELL_SIZE is because we're positioning its bottom
-        return CellView(frame: NSRect(origin:NSPoint(x: x, y: y), size:NSSize(width: CELL_SIZE, height:CELL_SIZE)))
+        let x = Double(col)*CELL_SIZE
+        let y = view.frame.height - Double(row)*CELL_SIZE - CELL_SIZE // -CELL_SIZE is because we're positioning its bottom
+        return CellView(frame: NSMakeRect(Double(x), Double(y), CELL_SIZE, CELL_SIZE))
     }
     
     private func readVocabularyFiles() ->Bool {
