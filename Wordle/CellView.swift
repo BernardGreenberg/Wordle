@@ -7,8 +7,8 @@
 
 import Cocoa
 
-private let SELECTED_FRAME_COLOR = NSColor(red: 1.00, green: 1.00, blue: 0.00, alpha: 1)
-private let NORMAL_FRAME_COLOR = NSColor(red: 0.50, green: 0.50, blue: 0.50, alpha: 1)
+private let SELECTED_OUTLINE_COLOR = NSColor(red: 1.00, green: 1.00, blue: 0.00, alpha: 1)
+private let NORMAL_OUTLINE_COLOR = NSColor(red: 0.50, green: 0.50, blue: 0.50, alpha: 1)
 private let FRAME_LINE_WIDTH = 2.0
 
 private let xCF = 1.0/255.0
@@ -84,7 +84,7 @@ final class CellView: NSView  {
     var Letter : String = ""
     weak var Dot : IndicatorDotView?
     var outlineBox : NSRect!
-    var frameColor : NSColor = NORMAL_FRAME_COLOR
+    var outlineColor : NSColor = NORMAL_OUTLINE_COLOR
 
     static var Font = NSFontManager.shared.font(withFamily: "Arial", traits: .boldFontMask, weight: 0, size: FONT_SIZE)
 
@@ -94,7 +94,7 @@ final class CellView: NSView  {
     private func drawOutlineBox() {
         let path = NSBezierPath(rect: outlineBox)  //life can be so easy!
         path.lineWidth = FRAME_LINE_WIDTH
-        frameColor.set()
+        outlineColor.set()
         path.stroke()
     }
 
@@ -141,7 +141,7 @@ final class CellView: NSView  {
         if State == .indicating {
             Dot!.start()
         }
-        frameColor = (State == .selected) ? SELECTED_FRAME_COLOR : NORMAL_FRAME_COLOR
+        outlineColor = (State == .selected) ? SELECTED_OUTLINE_COLOR : NORMAL_OUTLINE_COLOR
         setNeedsDisplay(frame)
     }
     
@@ -150,9 +150,8 @@ final class CellView: NSView  {
     
     public func endowWithIndicator() {
         let wallOffset = DOT_WALL_OFFSET*frame.width
-        let boxSize = NSSize(width:DOT_DIAMETER_FRACTION*frame.width, height:DOT_DIAMETER_FRACTION*frame.width)
-        let box = NSRect(origin: NSPoint(x: frame.width - wallOffset - boxSize.width,
-                                         y: wallOffset), size: boxSize)
+        let diameter = DOT_DIAMETER_FRACTION*frame.width
+        let box = NSMakeRect(frame.width - wallOffset - diameter, wallOffset, diameter, diameter)
         let dot = IndicatorDotView(frame: box)
         addSubview(dot) //don't set weak var until childed
         Dot = dot
