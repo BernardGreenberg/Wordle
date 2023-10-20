@@ -17,6 +17,10 @@ let ALPHABET30 = ALPHABET + "θφγδ"   //θεου φοβος γενει δαι
 
 let CELL_SIZE = 64
 
+let POPUP_TOP_PLACEMENT_CELLS = 4.75
+let REVELATOR_COLOR = NSColor.systemGreen
+let BOGON_COLOR = NSColor(red: 1.0, green: 0.5, blue: 0.5, alpha: 1)
+
 class Wordle: NSObject {
     var Cells : [[CellView]] = []  //"two dimensional array" of cells [row][col]
     var Revelator : PopupView
@@ -45,16 +49,17 @@ class Wordle: NSObject {
         
         /* Have to create these before super.init() call, or Swift will force them to be Optional.  */
         let dsz = Double(CELL_SIZE)
-        func createPopup(width : Double, x: Double, color: NSColor) -> PopupView {
-            let popupH = 0.5 * dsz
-            let popupY = view.frame.height - dsz * 4.8 - popupH
-            return PopupView(frame: NSRect(origin: NSPoint(x: x, y: popupY),
-                                           size: NSSize(width: width, height:popupH)),
+        func createPopup(width: Double, color: NSColor) -> PopupView {
+            let height = 0.5 * dsz
+            let x = (view.frame.width - width)/2.0
+            let y = view.frame.height - dsz * POPUP_TOP_PLACEMENT_CELLS - height
+            return PopupView(frame: NSRect(origin: NSPoint(x: x, y: y),
+                                           size: NSSize(width: width, height: height)),
                              color: color)
         }
 
-        Revelator = createPopup(width: 100, x: 1.7*dsz, color: NSColor.systemGreen)
-        BogonReporter = createPopup(width: 256.0, x: 30, color: NSColor(red: 1.0, green: 0.5, blue: 0.5, alpha: 1))
+        Revelator = createPopup(width: 100, color: REVELATOR_COLOR)
+        BogonReporter = createPopup(width: 256, color: BOGON_COLOR)
 
         super.init()
         
