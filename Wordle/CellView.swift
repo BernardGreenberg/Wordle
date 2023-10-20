@@ -61,7 +61,7 @@ final class IndicatorDotView : NSView {
         theTimer = Timer.scheduledTimer(timeInterval: DOT_PHASE_TIME,
                                         target: self, selector: #selector(timerHandler),
                                         userInfo: nil, repeats: true)
-        setNeedsDisplay(frame)
+        setNeedsDisplay(bounds)
     }
     public func stop () {
         if theTimer != nil {
@@ -69,12 +69,12 @@ final class IndicatorDotView : NSView {
             theTimer = nil
         }
         indicatorOn = false
-        setNeedsDisplay(frame)
+        setNeedsDisplay(bounds)
     }
 
     @objc private func timerHandler() {
         indicatorOn = !indicatorOn
-        setNeedsDisplay(frame)
+        setNeedsDisplay(bounds)
     }
 }
 
@@ -142,7 +142,7 @@ final class CellView: NSView  {
             Dot!.start()
         }
         outlineColor = (State == .selected) ? SELECTED_OUTLINE_COLOR : NORMAL_OUTLINE_COLOR
-        setNeedsDisplay(frame)
+        setNeedsDisplay(bounds)
     }
     
 
