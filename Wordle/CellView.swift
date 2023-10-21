@@ -167,4 +167,10 @@ final class CellView: NSView  {
         wantsLayer = true
         layer?.setAffineTransform(transform!)
     }
+    
+    /* hack hack hack*/
+    
+    override func mouseDown(with : NSEvent ) {
+        SomersaultForJoy(self).run(delay: 0)
+    }
 }
