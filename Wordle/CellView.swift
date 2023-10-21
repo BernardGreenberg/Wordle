@@ -81,14 +81,14 @@ final class IndicatorDotView : NSView {
 final class CellView: NSView  {
     var Text: NSTextField!
     var State : CellState = .empty
-    var Letter : String = ""
+    var Letter : Character = " "
     weak var Dot : IndicatorDotView?
     var outlineBox : NSRect!
     var outlineColor : NSColor = NORMAL_OUTLINE_COLOR
 
     static var Font = NSFontManager.shared.font(withFamily: "Arial", traits: .boldFontMask, weight: 0, size: FONT_SIZE)
 
-    var letter: String { get {Letter} set(x) {self.setLetter(letter: x)}}
+    var letter: Character { get {Letter} set(x) {self.setLetter(letter: x)}}
     var state : CellState {get {State} set (new_state) {self.setState(new_state:new_state)}}
 
     private func drawOutlineBox() {
@@ -124,7 +124,7 @@ final class CellView: NSView  {
         return control
     }
  
-    private func setLetter(letter: String) {
+    private func setLetter(letter: Character) {
         Letter = letter
         Text.stringValue = Letter.uppercased()
     }
@@ -136,7 +136,7 @@ final class CellView: NSView  {
         State = new_state
         Text.backgroundColor = stateColor[State]!
         if State == .empty || State == .selected {
-            setLetter(letter:"")
+            setLetter(letter:" ")
         }
         if State == .indicating {
             Dot!.start()

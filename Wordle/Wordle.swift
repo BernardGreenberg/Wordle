@@ -14,6 +14,7 @@ let LAST_ROW = 5
 let LAST_COLUMN = NCOLUMNS-1
 let ALPHABET = "abcdefghijklmnopqrstuvwxyz"
 let ALPHABET30 = ALPHABET + "θφγδ"   //θεου φοβος γενει δαιμονας
+let ALPH30_EXPLODED = ALPHABET30.map({$0}) //Direct char indexing not allowed
 
 let CELL_SIZE = 64.0
 
@@ -114,12 +115,6 @@ class Wordle: NSObject {
         return true
     }
     
-    /* string[3] as in Python, C, Java, etc. doesn't work in Swift. This bullshit is necessary. */
-    private func letterAt(_ s: String, _ pos0rel: Int) -> String {
-        let r = s.index(s.startIndex, offsetBy: pos0rel)..<s.index(s.startIndex, offsetBy: pos0rel+1)
-        return String(s[r])
-    }
-    
     private func mapAllCells( funarg: @escaping (_ row: Int, _ col:Int, _ cell:CellView)->Void) {
         for row in 0...LAST_ROW {
             for col in 0...LAST_COLUMN {
@@ -143,7 +138,7 @@ class Wordle: NSObject {
         BogonReporter.hide()
         closeSelectedCell()
         mapAllCells{(row, col, cell) in
-            cell.letter = self.letterAt(ALPHABET30, row*NCOLUMNS + col)
+            cell.letter = ALPH30_EXPLODED[row*NCOLUMNS + col]
             switch (col) {
             case 1:
                 cell.state = .contains_match
@@ -159,12 +154,14 @@ class Wordle: NSObject {
             }
             cell.isHidden = false
         }
+        Cells[0][LAST_COLUMN].state = .indicating
         jumpRowForJoy(row: 2)
         jiggleRowForDisappointment(row: 5)
         testUp = true
     }
     
     /* Handle input characters other than "rubout" and "Enter". See AppDelegate.swift */
+    /* public UI */
     
     public func handleCharacter(input: String){          /* not Enter */
 
@@ -174,8 +171,8 @@ class Wordle: NSObject {
         
         // Otherwise, install new letter and move input pointer.
             
-        if ALPHABET.contains(input) {
-            selectedCell!.letter = input
+        if ALPHABET.contains(input.first!) {
+            selectedCell!.letter = input.first!
             selectedCell!.state = .populated
             selectedCell = nil
             curCol += 1
@@ -209,6 +206,27 @@ class Wordle: NSObject {
         BogonReporter.hide()
         selectCell(curRow, curCol-1)
     }
+
+    public func revealAnswer() {
+        closeSelectedCell()
+        hideEmptyCells()
+        BogonReporter.hide()
+        Revelator.displayText(Answer)
+    }
+     
+    /* Initialize/reinitialize the game and the grid */
+    public func newGame() {
+        BogonReporter.hide()
+        Revelator.hide()
+        Answer = Answers.chooseRandom()
+        mapAllCells {(_, _, cell) in
+            cell.state = .empty
+            cell.isHidden = false
+        }
+        selectCell(0, 0)
+    }
+    
+    /* End public UI */
     
     private func processRowCompletion() {   //first-time Enter in last column
         let guess = curRowWord()
@@ -236,15 +254,15 @@ class Wordle: NSObject {
     }
 
     private func curRowWord() -> String {
-        return Cells[curRow].map(\.letter).joined()
+        return Cells[curRow].map({String($0.letter)}).joined()
     }
 
     /* Color and animate current row based on agreement with Answer */
     private func colorColorableCells(victory: Bool) {
-        var already_told: Set<String> = [] /*trick to prevent multiple assessments of same letter, Nanny! */
+        var already_told: Set<Character> = [] /*trick to prevent multiple assessments of same letter, Nanny! */
         // Must do this in 2 passes, or oranges will appear with green later on for the same letter.
         for ((cell, ansChar), j) in zip(zip(Cells[curRow], Answer), 0...LAST_ROW) {  // no zip for > 2 args
-            if Character(cell.letter) == ansChar {
+            if cell.letter == ansChar {
                 already_told.insert(cell.letter)
                 cell.state = .contains_and_place_match
                 if !victory{
@@ -261,25 +279,6 @@ class Wordle: NSObject {
                 SomersaultForJoy(cell).run(delay: j)  //NYT-compatible behavior for inactive letters
             }
         }
-    }
-    
-    public func revealAnswer() {
-        closeSelectedCell()
-        hideEmptyCells()
-        BogonReporter.hide()
-        Revelator.displayText(Answer)
-    }
-     
-    /* Initialize/reinitialize the game and the grid */
-    public func newGame() {
-        BogonReporter.hide()
-        Revelator.hide()
-        Answer = Answers.chooseRandom()
-        mapAllCells {(_, _, cell) in
-            cell.state = .empty
-            cell.isHidden = false
-        }
-        selectCell(0, 0)
     }
     
     private func selectCell(_ row: Int, _ col: Int) {
