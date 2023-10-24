@@ -357,8 +357,7 @@
                                     <action selector="revealWithEvent:" target="Voe-Tx-rLC" id="ZYs-1A-OxU"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Test graphics" keyEquivalent="t" id="7vE-Hu-6ct">
-                                <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                            <menuItem title="Demo" keyEquivalent="d" id="7vE-Hu-6ct">
                                 <connections>
                                     <action selector="testGraphicsWithEvent:" target="Voe-Tx-rLC" id="I5l-oC-TVd"/>
                                 </connections>

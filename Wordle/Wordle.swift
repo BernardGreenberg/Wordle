@@ -36,7 +36,7 @@ class Wordle: NSObject {
     var Answer = "     "
     var selectedCell : CellView? = nil
     var curRowCommitted = false
-    var testUp = false
+    var demoUp = false
     
     /* Cancel with button click or Enter, as Apple wants, no more char routing */
     private func alert(message: String, messageBody: String) {
@@ -133,7 +133,7 @@ class Wordle: NSObject {
     
     
     /* Was used during development, now a menu command in a theatre near you */
-    public func testGraphics () {
+    public func demo () {
         Revelator.hide()
         BogonReporter.hide()
         closeSelectedCell()
@@ -157,7 +157,7 @@ class Wordle: NSObject {
         Cells[0][LAST_COLUMN].state = .indicating
         jumpRowForJoy(row: 2)
         jiggleRowForDisappointment(row: 5)
-        testUp = true
+        demoUp = true
     }
     
     /* Handle input characters other than "rubout" and "Enter". See AppDelegate.swift */
@@ -165,7 +165,7 @@ class Wordle: NSObject {
     
     public func handleCharacter(input: String){          /* not Enter */
 
-        if selectedCell == nil || testUp {
+        if selectedCell == nil || demoUp {
             return
         }
         
@@ -187,7 +187,7 @@ class Wordle: NSObject {
     
     public func handleEnter() {
         /* This is a pretty complex overloaded gesture, Enter/Return ...  */
-        if testUp || Revelator.isVisible {
+        if demoUp || Revelator.isVisible {
             newGame()
         }
         else if curRowCommitted {
@@ -202,7 +202,7 @@ class Wordle: NSObject {
     }
 
     public func handleRubout() {  //called by input receiver when Delete pressed
-        if curCol == 0 || curRowCommitted || Revelator.isVisible || testUp {return}
+        if curCol == 0 || curRowCommitted || Revelator.isVisible || demoUp {return}
         BogonReporter.hide()
         selectCell(curRow, curCol-1)
     }
@@ -283,7 +283,7 @@ class Wordle: NSObject {
     
     private func selectCell(_ row: Int, _ col: Int) {
         (curRow, curCol) = (row, col)
-        testUp = false
+        demoUp = false
         curRowCommitted = false
         closeSelectedCell()
         let cell = Cells[row][col]

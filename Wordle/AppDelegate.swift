@@ -42,7 +42,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     @IBAction func testGraphics(event: Any) {
-        theWordle.testGraphics()
+        theWordle.demo()
     }
      
     func keyDownHandler(event: NSEvent) -> NSEvent? {
