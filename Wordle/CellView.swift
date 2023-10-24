@@ -57,23 +57,26 @@ final class IndicatorDotView : NSView {
     }
     public func start () {
         stop() // just in case
-        indicatorOn = true
+        setState(true)
         theTimer = Timer.scheduledTimer(timeInterval: DOT_PHASE_TIME,
                                         target: self, selector: #selector(timerHandler),
                                         userInfo: nil, repeats: true)
-        setNeedsDisplay(bounds)
     }
+
     public func stop () {
         if theTimer != nil {
             theTimer!.invalidate()
             theTimer = nil
         }
-        indicatorOn = false
-        setNeedsDisplay(bounds)
+        setState(false)
     }
 
     @objc private func timerHandler() {
-        indicatorOn = !indicatorOn
+        setState(!indicatorOn)  //flip state
+    }
+    
+    private func setState(_ state : Bool) {
+        indicatorOn = state
         setNeedsDisplay(bounds)
     }
 }
