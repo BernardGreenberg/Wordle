@@ -12,13 +12,14 @@ let NROWS = 6
 let NCOLUMNS = 5
 let LAST_ROW = 5
 let LAST_COLUMN = NCOLUMNS-1
-let ALPHABET = "abcdefghijklmnopqrstuvwxyz"
-let ALPHABET30 = ALPHABET + "θφγδ"   //θεου φοβος γενει δαιμονας
+let ALL_LC_REGEX = try! Regex("^[a-z]$")
+let ALPHABET30 = "abcdefghijklmnopqrstuvwxyz" + "θφγδ"   //θεου φοβος γενει δαιμονας
 let ALPH30_EXPLODED = ALPHABET30.map({$0}) //Direct char indexing not allowed
 
 let CELL_SIZE = 64.0
 
 let POPUP_TOP_PLACEMENT_CELLS = 4.75
+let POPUP_HEIGHT = CELL_SIZE/2.0
 let REVELATOR_COLOR = NSColor.systemGreen
 let BOGON_COLOR = NSColor(red: 1.0, green: 0.5, blue: 0.5, alpha: 1)
 
@@ -50,10 +51,9 @@ class Wordle: NSObject {
         
         /* Have to create these before super.init() call, or Swift will force them to be Optional.  */
         func createPopup(width: Double, color: NSColor) -> PopupView {
-            let height = 0.5 * CELL_SIZE
             let x = (view.frame.width - width)/2.0
-            let y = view.frame.height - CELL_SIZE * POPUP_TOP_PLACEMENT_CELLS - height
-            return PopupView(frame: NSMakeRect(x, y, width, height), color: color)
+            let y = view.frame.height - CELL_SIZE * POPUP_TOP_PLACEMENT_CELLS - POPUP_HEIGHT
+            return PopupView(frame: NSMakeRect(x, y, width, POPUP_HEIGHT), color: color)
         }
 
         Revelator = createPopup(width: 100, color: REVELATOR_COLOR)
@@ -95,7 +95,7 @@ class Wordle: NSObject {
     private func createCellAtRowCol(row: Int, col:Int, view: NSView) -> CellView {
         let x = Double(col)*CELL_SIZE
         let y = view.frame.height - Double(row)*CELL_SIZE - CELL_SIZE // -CELL_SIZE is because we're positioning its bottom
-        return CellView(frame: NSMakeRect(Double(x), Double(y), CELL_SIZE, CELL_SIZE))
+        return CellView(frame: NSMakeRect(x, y, CELL_SIZE, CELL_SIZE))
     }
     
     private func readVocabularyFiles() ->Bool {
@@ -170,8 +170,7 @@ class Wordle: NSObject {
         }
         
         // Otherwise, install new letter and move input pointer.
-            
-        if ALPHABET.contains(input.first!) {
+        if input.contains(ALL_LC_REGEX) {
             selectedCell!.letter = input.first!
             selectedCell!.state = .populated
             selectedCell = nil
